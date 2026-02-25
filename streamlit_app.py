@@ -130,7 +130,7 @@ if page == "Annotate":
         # Always take the first row from the filtered 'available' dataframe
         row = available_df.iloc[0]
         study_id = row["study_id"]
-        report_text = row["reports_preds"]
+        report_text = row["Reports"]
 
         st.header(f"Report {len(quant_done) + 1} of {QUANT_TARGET_REPORTS}")
         st.caption(f"Study ID: {study_id} | Source: {row['source_label']}")
