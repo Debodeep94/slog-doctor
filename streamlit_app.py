@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import os
 import time  # <--- New import for timing
 from typing import List
 import gspread
