@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import time  # <--- New import for timing
+import os
 from typing import List
 import gspread
 from google.oauth2.service_account import Credentials
@@ -96,6 +96,7 @@ if "prepared" not in st.session_state:
     user_seed = abs(hash(st.session_state.username)) % (2**32)
     pool_df = pd.concat([df1, df2], ignore_index=True)
     pool_df["uid"] = pool_df["study_id"].astype(str) + "__" + pool_df["source_label"]
+    # Shuffle for the specific user
     st.session_state.quant_df = pool_df.sample(frac=1, random_state=user_seed).reset_index(drop=True)
     st.session_state.prepared = True
 
@@ -103,6 +104,7 @@ if "prepared" not in st.session_state:
 user = st.session_state.username
 quant_done = get_progress_from_gsheet(user)
 
+# Filter out what's already done
 available_df = st.session_state.quant_df[
     ~st.session_state.quant_df["uid"].isin(quant_done)
 ].reset_index(drop=True)
@@ -125,24 +127,20 @@ if page == "Annotate":
         st.header("✅ All Done!")
         st.success("You have completed all assigned annotations.")
     else:
-        # --- TIMER START ---
-        # We store the start time in session state if it doesn't exist for the current study
-        current_study_id = available_df.iloc[0]["study_id"]
-        if "start_time" not in st.session_state or st.session_state.get("last_study_id") != current_study_id:
-            st.session_state.start_time = time.time()
-            st.session_state.last_study_id = current_study_id
-
+        # Always take the first row from the filtered 'available' dataframe
         row = available_df.iloc[0]
         study_id = row["study_id"]
         report_text = row["Reports"]
 
         st.header(f"Report {len(quant_done) + 1} of {QUANT_TARGET_REPORTS}")
+        # st.caption(f"Study ID: {study_id} | Source: {row['source_label']}")
         
         st.text_area("Report Text", report_text, height=300, disabled=True)
         
         st.subheader("Symptom Evaluation")
         st.info("Select the presence of each symptom based on the text above.")
 
+        # Organize inputs into a cleaner grid or list
         scores = {}
         for symptom in SYMPTOMS:
             scores[symptom] = st.radio(
@@ -153,10 +151,6 @@ if page == "Annotate":
             )
 
         if st.button("Submit Annotation", use_container_width=True):
-            # --- TIMER END ---
-            end_time = time.time()
-            duration = round(end_time - st.session_state.start_time, 2)
-
             result = {
                 "phase": "quant",
                 "study_id": study_id,
@@ -164,16 +158,12 @@ if page == "Annotate":
                 "source_file": row["source_file"],
                 "source_label": row["source_label"],
                 "annotator": user,
-                "time_spent_seconds": duration,  # <--- New Column
                 **{f"symptom_scores.{k}": v for k, v in scores.items()}
             }
             
             with st.spinner("Saving to Google Sheets..."):
                 append_to_gsheet("Annotations", result)
-                # Reset timer tracking for the next item
-                if "start_time" in st.session_state:
-                    del st.session_state["start_time"]
-                st.cache_data.clear() 
+                st.cache_data.clear() # Force refresh progress
                 st.rerun()
 
 elif page == "Review Results" and st.session_state.username == "admin":
