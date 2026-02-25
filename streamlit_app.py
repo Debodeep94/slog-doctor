@@ -90,11 +90,14 @@ df1["source_file"], df1["source_label"] = "slog.csv", "slog"
 df2 = pd.read_csv("selected_samples_00_new.csv")
 df2["source_file"], df2["source_label"] = "lam0.csv", "lam0"
 
-QUANT_TARGET_REPORTS = df1.shape[0] + df2.shape[0]
+df3 = pd.read_csv("selected_gt_findings.csv")
+df3["source_file"], df3["source_label"] = "gt_find.csv", "gt"
+
+QUANT_TARGET_REPORTS = df1.shape[0] + df2.shape[0] + df3.shape[0]
 
 if "prepared" not in st.session_state:
     user_seed = abs(hash(st.session_state.username)) % (2**32)
-    pool_df = pd.concat([df1, df2], ignore_index=True)
+    pool_df = pd.concat([df1, df2, df3], ignore_index=True)
     pool_df["uid"] = pool_df["study_id"].astype(str) + "__" + pool_df["source_label"]
     st.session_state.quant_df = pool_df.sample(frac=1, random_state=user_seed).reset_index(drop=True)
     st.session_state.prepared = True
