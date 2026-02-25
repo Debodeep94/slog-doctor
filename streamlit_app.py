@@ -133,7 +133,7 @@ if page == "Annotate":
         report_text = row["Reports"]
 
         st.header(f"Report {len(quant_done) + 1} of {QUANT_TARGET_REPORTS}")
-        st.caption(f"Study ID: {study_id} | Source: {row['source_label']}")
+        # st.caption(f"Study ID: {study_id} | Source: {row['source_label']}")
         
         st.text_area("Report Text", report_text, height=300, disabled=True)
         
