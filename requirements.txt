@@ -2,3 +2,5 @@ streamlit
 gspread
 oauth2client
 time
+gspread
+google-auth
