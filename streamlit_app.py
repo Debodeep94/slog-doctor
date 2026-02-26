@@ -86,18 +86,15 @@ if not st.session_state.logged_in:
 # === Load and Prepare Data ===
 df1 = pd.read_csv("selected_samples_new.csv")
 df1["source_file"], df1["source_label"] = "slog.csv", "slog"
-df1_studies = ['s58387960', 's52152296']
-df1 = df1[df1["study_id"].isin(df1_studies)].reset_index(drop=True)
+
 
 df2 = pd.read_csv("selected_samples_00_new.csv")
 df2["source_file"], df2["source_label"] = "lam0.csv", "lam0"
-df2_studies = ['s54127292', 's58125581', 's51882937', 's58387960', 's59071382']
-df2 = df2[df2["study_id"].isin(df2_studies)].reset_index(drop=True)
+
 
 df3 = pd.read_csv("selected_gt_findings.csv")
 df3["source_file"], df3["source_label"] = "gt_find.csv", "gt"
-df3_studies = ['s52279876', 's50037292']
-df3 = df3[df3["study_id"].isin(df3_studies)].reset_index(drop=True)
+
 
 QUANT_TARGET_REPORTS = df1.shape[0] + df2.shape[0] + df3.shape[0]
 
